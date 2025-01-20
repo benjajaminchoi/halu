@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hallucination Evaluator</title>
+    <style>
+        :root {
+            --primary-color: #0078d4;
+            --hover-color: #106ebe;
+            --background-color: #faf9f8;
+            --border-color: #edebe9;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            color: #323130;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #323130;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+        }
+
+        button:disabled {
+            background-color: #c8c6c4;
+            cursor: not-allowed;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            color: var(--primary-color);
+            margin-left: 12px;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 24px;
+            border-left: 4px solid;
+        }
+
+        .result-card.success {
+            border-left-color: #107C10;
+            background-color: #DFF6DD;
+        }
+
+        .result-card.error {
+            border-left-color: #A4262C;
+            background-color: #FDE7E9;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .success .result-title {
+            color: #107C10;
+        }
+
+        .error .result-title {
+            color: #A4262C;
+        }
+
+        .result-content {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .optional-label {
+            color: #666;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Hallucination Evaluator</h1>
+            <form id="evaluationForm">
+                <div class="input-group">
+                    <label class="input-label" for="question">Question</label>
+                    <textarea id="question" rows="3" placeholder="Enter your question here..." required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label" for="context">Context <span class="optional-label">(optional)</span></label>
+                    <textarea id="context" rows="5" placeholder="Enter the context here..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label" for="response">Response</label>
+                    <textarea id="response" rows="3" placeholder="Enter the response here..." required></textarea>
+                </div>
+
+                <div style="display: flex; align-items: center;">
+                    <button type="submit">Evaluate</button>
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                        <span>Evaluating...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="result" style="display: none;" class="result-card">
+            <div class="result-title"></div>
+            <div class="result-content"></div>
+        </div>
+    </div>
+
+    <script>
+document.getElementById('evaluationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const question = document.getElementById('question').value;
+    const context = document.getElementById('context').value;
+    const responseText = document.getElementById('response').value;
+    const resultDiv = document.getElementById('result');
+    const resultTitle = resultDiv.querySelector('.result-title');
+    const resultContent = resultDiv.querySelector('.result-content');
+    const loading = document.getElementById('loading');
+    const button = e.target.querySelector('button');
+
+    if (!question || !responseText) {
+        alert('Please fill in required fields (Question and Response)');
+        return;
+    }
+
+    const requestData = {
+        question: question,
+        response: responseText,
+    };
+    
+    if (context) {
+        requestData.context = context;
+    }
+
+    try {
+        loading.style.display = 'flex';
+        button.disabled = true;
+        resultDiv.style.display = 'none';
+
+        const response = await fetch('/evaluate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const result = await response.json();
+        
+        resultDiv.style.display = 'block';
+        resultDiv.classList.remove('success', 'error');
+
+        if (!response.ok) {
+            resultDiv.classList.add('error');
+            resultTitle.textContent = '⚠ Error';
+            resultContent.textContent = result.detail || 'An error occurred during evaluation';
+            return;
+        }
+
+        if (result.is_hallucination === false) {
+            resultDiv.classList.add('success');
+            resultTitle.textContent = '✓ No Hallucination Detected';
+            resultContent.textContent = result.explanation || 'The response is consistent with the provided context.';
+        } else {
+            resultDiv.classList.add('error');
+            resultTitle.textContent = '⚠ Hallucination Detected';
+            let content = '';
+            if (result.hallucination_type) {
+                content += `${result.hallucination_type}\n\n`;
+            }
+            if (result.explanation) {
+                content += result.explanation;
+            }
+            resultContent.textContent = content || 'Hallucination detected in the response.';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.style.display = 'block';
+        resultDiv.classList.add('error');
+        resultTitle.textContent = '⚠ Error';
+        resultContent.textContent = 'An error occurred during evaluation. Please try again.';
+    } finally {
+        loading.style.display = 'none';
+        button.disabled = false;
+    }
+});
+</script>
+</body>
+</html>
