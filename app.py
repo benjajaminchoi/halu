@@ -10,9 +10,7 @@ import os
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-client = OpenAI(
-    api_key="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"
-)
+client = OpenAI()
 
 
 class EvaluationRequest(BaseModel):
