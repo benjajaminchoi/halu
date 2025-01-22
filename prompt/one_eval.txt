@@ -313,9 +313,8 @@ Q15
 
 
 ---
-
-RESPONSE INSTRUCTIONS: Return your analysis ONLY in the following **JSON** format
-
+RESPONSE INSTRUCTIONS:
+Return your analysis ONLY in the following JSON format:
 {
     "explanation": <Provide your analysis following these points:
         - Quote the specific problematic parts from the answer
@@ -323,7 +322,7 @@ RESPONSE INSTRUCTIONS: Return your analysis ONLY in the following **JSON** forma
         - Provide clear reasoning for why this specific type was chosen over others
         - Reference only the hallucination type definitions provided>,
     "is_hallucination": <true if any type of hallucination is detected, false if not>,
-    "hallucination_type": <If is_hallucination is true, specify the identified type number (e.g., "Type 5", "Type 6", etc.). If false, return null>
+    "hallucination_type": <If is_hallucination is true, specify the identified type n(e.g., "Irrelevance of LLM output", "Factual Contradiction in LLM Output", etc.). If false, return null>
 }
 
 IMPORTANT:
@@ -334,3 +333,4 @@ IMPORTANT:
 - Use direct quotes when referencing specific parts of the text
 - Do not introduce criteria or considerations outside of the provided definitions
 - A short answer does not mean it is a hallucination. You should be able to classify a short answer as normal if it is consistent with the context and you understand the intent of the question.
+- Response MUST BE IN KOREAN

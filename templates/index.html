@@ -157,12 +157,25 @@
             font-size: 0.8em;
             margin-left: 8px;
         }
+
+        .small-link {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            margin-left: 5px;
+            text-decoration: none;
+            color: #007BFF;
+            cursor: pointer;
+        }
+
+        .small-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <h1>Hallucination Evaluator</h1>
+            <h1>RAG Hallucination Detection and Classification System</h1>
             <form id="evaluationForm">
                 <div class="input-group">
                     <label class="input-label" for="question">Question</label>
@@ -175,19 +188,37 @@
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label" for="response">Response</label>
+                    <label class="input-label" for="response">Answer</label>
                     <textarea id="response" rows="3" placeholder="Enter the response here..." required></textarea>
                 </div>
 
-                <div style="display: flex; align-items: center;">
-                    <button type="submit">Evaluate</button>
-                    <div id="loading" class="loading">
-                        <div class="spinner"></div>
-                        <span>Evaluating...</span>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px">
+                        <button type="submit">Evaluate</button>
+                        <div id="loading" class="loading">
+                            <div class="spinner"></div>
+                            <span>Evaluating...</span>
+                        </div>
+                    </div>
+                    <div class="example-links">
+                        <a href="#" id="example1" class="small-link">Example 1</a>
+                        <a href="#" id="example2" class="small-link">Example 2</a>
+                        <a href="#" id="example3" class="small-link">Example 3</a>
                     </div>
                 </div>
             </form>
         </div>
+
+        <!-- Remove or comment out the separate button-container div -->
+        <!--
+        <div class="button-container" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 20px;">
+            <div class="example-links">
+                <a href="#" id="example1" class="small-link">Example 1</a>
+                <a href="#" id="example2" class="small-link">Example 2</a>
+                <a href="#" id="example3" class="small-link">Example 3</a>
+            </div>
+        </div>
+        -->
 
         <div id="result" style="display: none;" class="result-card">
             <div class="result-title"></div>
@@ -236,6 +267,7 @@ document.getElementById('evaluationForm').addEventListener('submit', async (e) =
         });
 
         const result = await response.json();
+        console.log('Result:', result);
         
         resultDiv.style.display = 'block';
         resultDiv.classList.remove('success', 'error');
@@ -253,15 +285,17 @@ document.getElementById('evaluationForm').addEventListener('submit', async (e) =
             resultContent.textContent = result.explanation || 'The response is consistent with the provided context.';
         } else {
             resultDiv.classList.add('error');
-            resultTitle.textContent = '⚠ Hallucination Detected';
+            resultTitle.textContent = 'Hallucination Detected';
             let content = '';
             if (result.hallucination_type) {
-                content += `${result.hallucination_type}\n\n`;
+                // content += `${result.hallucination_type}<br>`;
+                resultTitle.textContent = `⚠ ${result.hallucination_type} ` + resultTitle.textContent;
+                
             }
             if (result.explanation) {
                 content += result.explanation;
             }
-            resultContent.textContent = content || 'Hallucination detected in the response.';
+            resultContent.innerHTML = content || 'Hallucination detected in the response.';
         }
     } catch (error) {
         console.error('Error:', error);
@@ -273,6 +307,37 @@ document.getElementById('evaluationForm').addEventListener('submit', async (e) =
         loading.style.display = 'none';
         button.disabled = false;
     }
+});
+
+function setExample(questionText, contextText, responseText) {
+    document.getElementById("question").value = questionText;
+    document.getElementById("context").value = contextText;
+    document.getElementById("response").value = responseText;
+}
+
+document.getElementById("example1").addEventListener("click", function() {
+    setExample(
+      "암보험 가입자의 건강 상태가 변경되면 보험료가 자동으로 조정되나요?",
+      "건강 상태 변경은 보험료 조정에 영향을 미치지 않으며, 가입 당시 기준이 유지됩니다. 단, 새로운 보장을 추가하거나 변경할 경우 추가 심사가 필요할 수 있습니다.",
+      "암보험 약관에서 보장되지 않는 암의 조건은 약관에 명시된 면책 사유나 보장 제외 대상에 해당하는 경우입니다."
+    );
+});
+
+
+document.getElementById("example2").addEventListener("click", function() {
+    setExample(
+      "암보험 약관에서 피보험자의 사망이 보장되지 않는 주요 이유는?",
+      "제24조 계약의 무효 - 피보험자가 만 15세 미만, 심신상실자, 심신박약자인 경우 사망을 보장하지 않습니다. 제10조 보험금을 지급하지 않는 사유 - 자살 등 고의적 행위는 보장되지 않습니다.",
+      "피보험자의 사망이 보장되지 않는 주요 이유는 고의가 아닌 자연사가 주요 원인이기 때문입니다. 또한 피보험자가 만 20세 이상일 경우 사망을 보장하지 않습니다."
+    );
+});
+
+document.getElementById("example3").addEventListener("click", function() {
+    setExample(
+      "보험 약관을 재발급받으려면 어떻게 해야 하나요?",
+      "약관에 따르면 보험 약관 재발급은 고객센터 또는 해당 보험사 홈페이지를 통해 요청할 수 있습니다. 재발급 시 본인 확인이 필요하며, 일부 경우 우편 발송 비용이 청구될 수 있습니다",
+      "Example response 3"
+    );
 });
 </script>
 </body>

@@ -50,7 +50,7 @@ async def evaluate_hallucination(evaluation: EvaluationRequest):
         system_prompt = get_prompt("prompt/one_eval.txt")
 
         # Add format enforcement to system prompt
-        system_prompt += '\nIMPORTANT: Your response must be valid JSON with the following structure: {"is_hallucination": boolean, "explanation": string}'
+        # system_prompt += '\nIMPORTANT: Your response must be valid JSON with the following structure: {"is_hallucination": boolean, "explanation": string}'
 
         completion = client.chat.completions.create(
             model="gpt-4o",  # Fixed model name
