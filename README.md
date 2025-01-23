@@ -6,6 +6,44 @@ AI 모델의 응답에서 발생할 수 있는 할루시네이션(환각, 허구
 이는 8 Failure Types of LLM Output이라는 이론적 프레임워크를 기반으로 구현된 시스템입니다.
 GPT-4를 활용하여 AI 응답의 신뢰성을 검증하고, 할루시네이션 여부를 판단하는 것을 목표로 합니다.
 
+## 데이터셋 구축 📊
+### 보험 도메인 특화 데이터셋
+본 프로젝트는 보험 도메인에 특화된 고품질 데이터셋을 구축하여 할루시네이션 탐지의 정확도를 높였습니다.
+
+#### 데이터셋 구축 과정
+1. **Document 준비**
+   - KB 착한암보험 무배당 약관을 기반 문서로 선정
+   - 보험 전문 지식이 필요한 도메인 특화 데이터 구축
+
+2. **전문가 Seed Data 생성**
+   - 전문가가 50개의 기초 데이터(Question, Context, Answer) 생성
+   - 보험 약관의 핵심 내용을 포괄하는 질의응답 쌍 구성
+
+3. **Seed-based Data 확장**
+   - 초기 50개의 Seed Data를 기반으로 200개의 추가 데이터 생성
+   - 다양한 질문 유형과 맥락을 포함하도록 확장
+
+4. **Hallucinated Answer 생성**
+   - 기존 Question과 Context를 활용하여 의도적인 할루시네이션 응답 생성
+   - 다양한 유형의 할루시네이션 포함 (Type 5~8)
+
+5. **전문가 검수**
+   - 생성된 모든 데이터에 대한 전문가 검증
+   - 할루시네이션 유형 분류의 정확성 확인
+   - 보험 도메인 전문성 검증
+
+6. **Golden Dataset 완성**
+   - 총 250개의 고품질 QA 쌍 구축
+   - 할루시네이션 유형별 분류 정보 포함
+   - 보험 도메인 특화 검증 데이터셋 확보
+
+#### 데이터셋 구조
+- **Question**: 보험 관련 질문
+- **Context**: 관련 약관 내용 또는 배경 정보
+- **Response**: AI 모델의 응답
+- **is_hallucination**: 할루시네이션 여부
+- **hallucination_type**: 할루시네이션 유형 분류 (Type 5~8)
+
 ## 주요 기능 💡
 - AI 응답의 할루시네이션 평가: Type 5 (Irrelevance of LLM Output), Type 6 (Factual Contradiction), Type 7 (Factual Fabrication), Type 8 (Logical Inconsistency) 여부를 탐지하고 어떤 Type의 Hallucination인지 분류
 - 실시간 응답 분석
