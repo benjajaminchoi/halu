@@ -115,9 +115,3 @@ vercel
 ## 연락처 📧
 - 개발자: Benjamin Choi
 - 웹사이트: halu-lilac.vercel.app
-
-## 업데이트 내역 🔄
-- v1.0.0 (2024-03)
-  - FastAPI 기반 웹 애플리케이션 구현
-  - GPT-4 기반 할루시네이션 평가 시스템 구축
-  - Docker 및 Vercel 배포 지원
